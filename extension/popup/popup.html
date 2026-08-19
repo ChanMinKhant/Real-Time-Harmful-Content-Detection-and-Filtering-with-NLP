@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Harmful Content Guard</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+
+<body>
+  <div class="popup-container">
+    <!-- Header -->
+    <header class="header">
+      <div class="brand">
+        <span class="shield-icon">🛡️</span>
+        <div>
+          <h1>Blurry Guard</h1>
+          <span class="subtitle">Bilingual NLP Toxicity Filter</span>
+        </div>
+      </div>
+      <div class="status-indicator" id="status-indicator">
+        <span class="dot"></span>
+        <span class="status-text" id="status-text">Checking...</span>
+      </div>
+    </header>
+
+    <!-- Main Toggle -->
+    <div class="card toggle-card">
+      <div class="toggle-info">
+        <span class="card-title">Real-Time Protection</span>
+        <span class="card-desc">Scan and blur toxic content automatically</span>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="main-toggle" checked>
+        <span class="slider round"></span>
+      </label>
+    </div>
+
+    <!-- Sensitivity Slider -->
+    <div class="card">
+      <div class="slider-header">
+        <span class="card-title">Detection Sensitivity</span>
+        <span class="threshold-badge" id="threshold-val">60%</span>
+      </div>
+      <input type="range" id="sensitivity-slider" min="40" max="95" value="60" class="range-slider">
+      <div class="slider-labels">
+        <span>Sensitive (Low)</span>
+        <span>Balanced</span>
+        <span>Strict (High)</span>
+      </div>
+    </div>
+
+    <!-- Category Filters -->
+    <div class="card">
+      <span class="card-title">Active Categories</span>
+      <div class="checkbox-grid">
+        <label class="custom-check">
+          <input type="checkbox" id="cat-hate" checked>
+          <span class="checkmark"></span>
+          <span>Hate Speech</span>
+        </label>
+        <label class="custom-check">
+          <input type="checkbox" id="cat-bullying" checked>
+          <span class="checkmark"></span>
+          <span>Cyberbullying</span>
+        </label>
+        <label class="custom-check">
+          <input type="checkbox" id="cat-profanity" checked>
+          <span class="checkmark"></span>
+          <span>Profanity</span>
+        </label>
+        <label class="custom-check">
+          <input type="checkbox" id="cat-toxicity" checked>
+          <span class="checkmark"></span>
+          <span>Toxicity</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Statistics -->
+    <div class="stats-row">
+      <div class="stat-box">
+        <span class="stat-val" id="stat-blurred">0</span>
+        <span class="stat-lbl">Blocked Today</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-val" id="stat-scanned">0</span>
+        <span class="stat-lbl">Elements Scanned</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-val" id="stat-latency">~4ms</span>
+        <span class="stat-lbl">Avg NLP Latency</span>
+      </div>
+    </div>
+
+    <!-- Quick In-Popup NLP Tester -->
+    <div class="card test-card">
+      <span class="card-title">🔬 Instant NLP Tester</span>
+      <div class="test-input-group">
+        <input type="text" id="test-input" placeholder="Type text (EN or MM) to test..." autocomplete="off">
+        <button id="test-btn">Test</button>
+      </div>
+      <div id="test-result" class="test-result" style="display: none;"></div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <span>EN/MM Support</span>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+
+</html>

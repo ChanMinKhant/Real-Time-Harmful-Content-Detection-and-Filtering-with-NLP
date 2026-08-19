@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NLP Presentation Demo - Social Feed Simulation</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --card-border: #334155;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #6366f1;
+      --accent-hover: #4f46e5;
+      --danger: #ef4444;
+      --success: #22c55e;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Pyidaungsu", "Myanmar Text", "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      line-height: 1.5;
+      padding: 24px 16px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    /* Presentation Banner */
+    .banner {
+      background: linear-gradient(135deg, #312e81 0%, #1e1b4b 100%);
+      border: 1px solid #4338ca;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .banner-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .banner h1 {
+      font-size: 20px;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .badge {
+      background: var(--accent);
+      color: white;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .banner p {
+      font-size: 13.5px;
+      color: #c7d2fe;
+      margin-bottom: 16px;
+    }
+
+    .demo-presets {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .preset-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .preset-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-1px);
+    }
+
+    .preset-btn.danger {
+      border-color: rgba(239, 68, 68, 0.4);
+      color: #fca5a5;
+    }
+
+    .preset-btn.danger:hover {
+      background: rgba(239, 68, 68, 0.25);
+    }
+
+    .preset-btn.success {
+      border-color: rgba(34, 197, 94, 0.4);
+      color: #86efac;
+    }
+
+    .preset-btn.success:hover {
+      background: rgba(34, 197, 94, 0.25);
+    }
+
+    /* Live Comment Composer */
+    .composer-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 24px;
+    }
+
+    .composer-header {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: #e2e8f0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .composer-input-group {
+      display: flex;
+      gap: 10px;
+    }
+
+    .composer-input {
+      flex: 1;
+      background: #0f172a;
+      border: 1px solid var(--card-border);
+      color: white;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 13.5px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .composer-input:focus {
+      border-color: var(--accent);
+    }
+
+    .post-btn {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .post-btn:hover {
+      background: var(--accent-hover);
+    }
+
+    /* Feed & Post Cards */
+    .feed {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .post-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .post-author-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #4f46e5 0%, #06b6d4 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 16px;
+      color: white;
+    }
+
+    .author-info h4 {
+      font-size: 14px;
+      font-weight: 600;
+      color: #f1f5f9;
+    }
+
+    .author-info span {
+      font-size: 11.5px;
+      color: var(--text-muted);
+    }
+
+    .post-content {
+      font-size: 14.5px;
+      color: #e2e8f0;
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+
+    /* Comments Section */
+    .comments-section {
+      border-top: 1px solid var(--card-border);
+      padding-top: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .comments-title {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .comment-item {
+      background: #0f172a;
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .comment-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #334155;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .comment-body {
+      flex: 1;
+    }
+
+    .comment-author {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #cbd5e1;
+      margin-bottom: 2px;
+    }
+
+    .comment-text {
+      font-size: 13.5px;
+      color: #e2e8f0;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header Banner -->
+    <div class="banner">
+      <div class="banner-header">
+        <h1>🛡️ NLP Presentation Live Demo Feed</h1>
+        <span class="badge">Real-Time Bilingual Guardian</span>
+      </div>
+      <p>
+        အောက်ပါ Social Feed တွင် English နှင့် မြန်မာဘာသာ Safe Posts များအပြင် Toxic, Cyberbullying, Hate Speech ပါဝင်သော Comments များ ပါရှိပါသည်။ Chrome Extension က အဆိုပါ Harmful စာသားများကို Real-time စစ်ဆေးပြီး အလိုအလျောက် <strong>Blur</strong> ပြုလုပ်ပေးပါမည်။ (Blur ဖြစ်နေသော စာသားကို <strong>Double Click</strong> နှိပ်၍ Reveal / Re-blur ပြုလုပ်နိုင်ပါသည်)
+      </p>
+
+      <!-- Preset Action Buttons for Quick Presentation -->
+      <div class="demo-presets">
+        <button class="preset-btn danger" onclick="addPreset('en_cyberbullying')">+ Add EN Cyberbullying</button>
+        <button class="preset-btn danger" onclick="addPreset('mm_toxic')">+ Add MM Toxic/Profanity</button>
+        <button class="preset-btn danger" onclick="addPreset('mm_hate')">+ Add MM Hate Speech</button>
+        <button class="preset-btn success" onclick="addPreset('en_safe')">+ Add EN Wholesome Post</button>
+        <button class="preset-btn success" onclick="addPreset('mm_safe')">+ Add MM Polite Post</button>
+      </div>
+    </div>
+
+    <!-- Live Composer -->
+    <div class="composer-card">
+      <div class="composer-header">
+        <span>✍️ Live Dynamic Comment Tester (Type & Post)</span>
+      </div>
+      <form id="comment-form" class="composer-input-group" onsubmit="handleLivePost(event)">
+        <input type="text" id="live-input" class="composer-input" placeholder="Type any comment in English or မြန်မာစာ to test real-time blur..." autocomplete="off">
+        <button type="submit" class="post-btn">Post Comment</button>
+      </form>
+    </div>
+
+    <!-- Feed -->
+    <div class="feed" id="feed-container">
+      
+      <!-- Post 1: Tech & AI Discussion -->
+      <div class="post-card">
+        <div class="post-author-row">
+          <div class="avatar">AK</div>
+          <div class="author-info">
+            <h4>Aung Kyaw (AI Enthusiast)</h4>
+            <span>20 mins ago &bull; Public</span>
+          </div>
+        </div>
+        <p class="post-content">
+          Excited to share our Natural Language Processing research on real-time cyberbullying and toxic content detection! It balances speed (<10ms) and contextual accuracy. What do you think?
+        </p>
+
+        <!-- Comments -->
+        <div class="comments-section" id="comments-post-1">
+          <span class="comments-title">Discussion & Comments</span>
+          
+          <!-- Safe Comment (English) -->
+          <div class="comment-item">
+            <div class="comment-avatar">SL</div>
+            <div class="comment-body">
+              <div class="comment-author">Sarah Lin</div>
+              <p class="comment-text">Congratulations! This is such an important project for creating safe online spaces. Great work!</p>
+            </div>
+          </div>
+
+          <!-- Harmful Comment (English Cyberbullying / Insult) -->
+          <div class="comment-item">
+            <div class="comment-avatar">TX</div>
+            <div class="comment-body">
+              <div class="comment-author">ToxicUser99</div>
+              <p class="comment-text">Shut up you idiot, your project is complete garbage and nobody cares about your stupid AI.</p>
+            </div>
+          </div>
+
+          <!-- Harmful Comment (English Threat / Severe) -->
+          <div class="comment-item">
+            <div class="comment-avatar">BL</div>
+            <div class="comment-body">
+              <div class="comment-author">BullyBob</div>
+              <p class="comment-text">You are a pathetic loser, go die already and delete your account.</p>
+            </div>
+          </div>
+
+          <!-- Harmful Comment with Link (Tests click prevention while blurred) -->
+          <div class="comment-item">
+            <div class="comment-avatar">LK</div>
+            <div class="comment-body">
+              <div class="comment-author">SpamBot99</div>
+              <p class="comment-text">
+                Check this out: <a href="https://example.com/spam" style="color: #60a5fa;" target="_blank">You brainless clown, click here to see complete garbage</a>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Post 2: Myanmar Community Discussion -->
+      <div class="post-card">
+        <div class="post-author-row">
+          <div class="avatar" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">TM</div>
+          <div class="author-info">
+            <h4>Thiri May</h4>
+            <span>1 hour ago &bull; Public</span>
+          </div>
+        </div>
+        <p class="post-content">
+          အားလုံးပဲ မင်္ဂလာပါရှင်။ ကျောင်းမှာ NLP project အတွက် presentation ပြင်ဆင်နေကြတဲ့ သူငယ်ချင်းများအားလုံး အောင်မြင်ကြပါစေလို့ ဆုတောင်းပေးပါတယ်ရှင်။
+        </p>
+
+        <!-- Comments -->
+        <div class="comments-section" id="comments-post-2">
+          <span class="comments-title">Comments</span>
+          
+          <!-- Safe Myanmar Comment -->
+          <div class="comment-item">
+            <div class="comment-avatar">MG</div>
+            <div class="comment-body">
+              <div class="comment-author">Mg Mg</div>
+              <p class="comment-text">ကျေးဇူးအများကြီးတင်ပါတယ်ဗျာ။ အားလုံးပဲ ကောင်းသောနေ့လေးဖြစ်ကြပါစေ။</p>
+            </div>
+          </div>
+
+          <!-- Harmful Myanmar Comment (Profanity) -->
+          <div class="comment-item">
+            <div class="comment-avatar">RB</div>
+            <div class="comment-body">
+              <div class="comment-author">RudeBoy</div>
+              <p class="comment-text">ဒီကောင်က တော်တော်ရိုင်းတာပဲ ခွေးလိုကောင် စောက်ချိုးမပြေဘူး။</p>
+            </div>
+          </div>
+
+          <!-- Harmful Myanmar Comment (Cyberbullying) -->
+          <div class="comment-item">
+            <div class="comment-avatar">KL</div>
+            <div class="comment-body">
+              <div class="comment-author">Kyaw Lin</div>
+              <p class="comment-text">မင်းလို အသုံးမကျတဲ့ ငတုံးက ဘာသိမှာလဲ သွားသေလိုက် ရုပ်ကိုက ရွံစရာကောင်းလိုက်တာ။</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // Presets for instant presentation testing
+    const PRESETS = {
+      en_cyberbullying: {
+        author: "TrollBot",
+        text: "You are an ugly stupid loser and a complete waste of oxygen."
+      },
+      mm_toxic: {
+        author: "ဆဲဆိုသူ",
+        text: "စောက်ရမ်း အချိုးမပြေတဲ့ကောင် မအေလိုးသား ခွေးမသား။"
+      },
+      mm_hate: {
+        author: "HateAcc",
+        text: "ဒီလူမျိုးတွေက တိုင်းပြည်ဖျက်တဲ့ ခွေးကုလားတွေပဲ မျိုးမစစ်တွေ။"
+      },
+      en_safe: {
+        author: "Emily Watson",
+        text: "Have a wonderful, blessed, and productive day everyone!"
+      },
+      mm_safe: {
+        author: "ဇေယျာ",
+        text: "အကြံပေးချက်နှင့် မျှဝေပေးမှုအတွက် အထူးပင် ကျေးဇူးတင်ရှိပါသည်။"
+      }
+    };
+
+    function addPreset(type) {
+      const preset = PRESETS[type];
+      if (!preset) return;
+      appendCommentToFeed(preset.author, preset.text);
+    }
+
+    function handleLivePost(e) {
+      e.preventDefault();
+      const input = document.getElementById("live-input");
+      const text = input.value.trim();
+      if (!text) return;
+      appendCommentToFeed("You (Live Demo)", text);
+      input.value = "";
+    }
+
+    function appendCommentToFeed(author, text) {
+      const commentsSection = document.getElementById("comments-post-1");
+      const commentItem = document.createElement("div");
+      commentItem.className = "comment-item";
+      commentItem.innerHTML = `
+        <div class="comment-avatar">${author.substring(0, 2).toUpperCase()}</div>
+        <div class="comment-body">
+          <div class="comment-author">${author} <span style="font-size:10px; color:#64748b;">(Just now)</span></div>
+          <p class="comment-text">${text}</p>
+        </div>
+      `;
+      commentsSection.appendChild(commentItem);
+    }
+  </script>
+</body>
+</html>

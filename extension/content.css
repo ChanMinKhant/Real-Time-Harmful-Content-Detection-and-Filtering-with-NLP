@@ -1,0 +1,36 @@
+/* Real-time Harmful Content Direct Blur Styles */
+
+/* Blurred Element Styling */
+.nlp-blur-active {
+  filter: blur(9px) grayscale(50%) opacity(0.35) !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  transition: filter 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.nlp-blur-active:hover {
+  filter: blur(6px) grayscale(30%) opacity(0.55) !important;
+}
+
+/* Locked links/buttons while blurred */
+a.nlp-blur-active, .nlp-blur-active a, button.nlp-blur-active, .nlp-blur-active button {
+  cursor: pointer !important;
+  text-decoration: none !important;
+  pointer-events: auto !important;
+}
+
+/* Revealed Element Styling - 100% force unblur on revealed node and all nested children */
+.nlp-blur-revealed,
+.nlp-blur-revealed * {
+  filter: none !important;
+  opacity: 1 !important;
+  user-select: auto !important;
+  -webkit-user-select: auto !important;
+  cursor: auto !important;
+}
+
+a.nlp-blur-revealed, .nlp-blur-revealed a {
+  cursor: pointer !important;
+}
