@@ -4,7 +4,9 @@
 
 const API_CANDIDATES = [
   "http://127.0.0.1:5001/api",
-  "http://127.0.0.1:5000/api"
+  "http://127.0.0.1:5000/api",
+  "http://localhost:5001/api",
+  "http://localhost:5000/api"
 ];
 let API_BASE = API_CANDIDATES[0];
 
@@ -42,6 +44,7 @@ function initPopup() {
       if (s.filterCyberbullying !== undefined) catBullying.checked = s.filterCyberbullying;
       if (s.filterProfanity !== undefined) catProfanity.checked = s.filterProfanity;
       if (s.filterToxicity !== undefined) catToxicity.checked = s.filterToxicity;
+      if (s.customBaseUrl) API_BASE = s.customBaseUrl;
 
       // Stats
       const st = res.nlp_stats || { scanned: 0, blurred: 0 };
@@ -61,7 +64,8 @@ function saveSettings() {
     filterHateSpeech: catHate.checked,
     filterCyberbullying: catBullying.checked,
     filterProfanity: catProfanity.checked,
-    filterToxicity: catToxicity.checked
+    filterToxicity: catToxicity.checked,
+    customBaseUrl: API_BASE
   };
 
   if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
@@ -71,11 +75,13 @@ function saveSettings() {
 
 // Check Backend Health & Stats
 async function checkBackendHealth() {
-  for (const candidate of API_CANDIDATES) {
+  const candidates = API_BASE ? [API_BASE, ...API_CANDIDATES.filter(u => u !== API_BASE)] : API_CANDIDATES;
+  for (const candidate of candidates) {
     try {
-      const res = await fetch(`${candidate}/health`, { method: "GET" });
+      const clean = candidate.replace(/\/+$/, "");
+      const res = await fetch(`${clean}/health`, { method: "GET" });
       if (res.ok) {
-        API_BASE = candidate;
+        API_BASE = clean;
         const data = await res.json();
         statusIndicator.className = "status-indicator online";
         statusText.innerText = "Online 🟢";
@@ -150,24 +156,26 @@ testBtn.addEventListener("click", async () => {
     testBtn.disabled = false;
     testBtn.innerText = "Test";
     testResult.className = "test-result harmful";
-    testResult.innerHTML = "<strong>Backend offline</strong>. Please run python app.py";
+    testResult.innerHTML = "<strong>Backend offline</strong>. Please run <code>python app.py</code>";
   }
 });
 
 function renderTestResult(data) {
+  const confidence = Math.round(data.score * 100);
+  const latency = data.latency_ms !== undefined ? `${data.latency_ms}ms` : "<1ms";
   if (data.is_harmful) {
     testResult.className = "test-result harmful";
     testResult.innerHTML = `
-      <strong>⚠️ HARMFUL DETECTED (${Math.round(data.score * 100)}%)</strong><br>
+      <strong>⚠️ HARMFUL DETECTED (${confidence}%)</strong><br>
       <strong>Category:</strong> ${data.category}<br>
-      <strong>Tier:</strong> ${data.tier_used} (${data.latency_ms}ms)<br>
+      <strong>Tier:</strong> ${data.tier_used} (${latency})<br>
       <small>${data.reason}</small>
     `;
   } else {
     testResult.className = "test-result safe";
     testResult.innerHTML = `
       <strong>✅ SAFE CONTENT</strong><br>
-      <strong>Tier:</strong> ${data.tier_used} (${data.latency_ms}ms)<br>
+      <strong>Tier:</strong> ${data.tier_used} (${latency})<br>
       <small>${data.reason}</small>
     `;
   }

@@ -1,0 +1,17 @@
+{
+  "model_version": "2.0.0",
+  "trained_at": "2026-09-02T05:03:30.814581+00:00",
+  "dataset_size": 832,
+  "train_size": 665,
+  "test_size": 167,
+  "f1_harmful_tier2": 1.0,
+  "f1_harmful_tier3": 1.0,
+  "vectorizer": {
+    "analyzer": "char_wb",
+    "ngram_range": [
+      2,
+      5
+    ],
+    "sublinear_tf": true
+  }
+}

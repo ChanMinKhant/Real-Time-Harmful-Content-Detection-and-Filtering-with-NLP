@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Harmful Content Blurry Guard (NLP)",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Real-time AI/NLP detector for Harmful Content, Hate Speech, & Cyberbullying with automatic element blurring.",
   "permissions": [
     "storage",
@@ -36,7 +36,13 @@
     {
       "matches": ["<all_urls>"],
       "css": ["content.css"],
-      "js": ["content.js"],
+      "js": [
+        "rules.js",
+        "api_client.js",
+        "blur_manager.js",
+        "dom_scanner.js",
+        "content.js"
+      ],
       "run_at": "document_idle",
       "all_frames": true
     }

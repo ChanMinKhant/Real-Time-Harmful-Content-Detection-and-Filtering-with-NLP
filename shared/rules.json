@@ -1,0 +1,64 @@
+{
+  "version": "1.0.0",
+  "description": "Centralized Bilingual (English & Myanmar) Ruleset for Harmful Content Detection",
+  "categories": {
+    "hate_speech": "Hate Speech (အမုန်းစကား)",
+    "cyberbullying": "Cyberbullying (အနိုင်ကျင့်စော်ကားမှု)",
+    "profanity": "Profanity / Toxicity (ဆဲဆိုရိုင်းစိုင်းမှု)",
+    "insult": "Insult (စော်ကားနှိမ်ချမှု)"
+  },
+  "myanmar_lexicon": {
+    "hate_speech": [
+      "ကုလား", "ကုလားဆိုး", "တရုတ်ခွေး", "ခွေးကုလား", "ဘာသာဖျက်",
+      "မိစ္ဆာဒိဌိ", "ခွေးမျိုး", "ကုလားဖြူ", "ကုလားမဲ", "လူမျိုးတုံး",
+      "မျိုးမစစ်", "တိုင်းတစ်ပါးသားခွေး", "ကုလားဂျင်း"
+    ],
+    "cyberbullying": [
+      "သေလိုက်ပါလား", "သွားသေလိုက်", "မင်းအသက်ရှင်နေတာအပိုပဲ", "ရုပ်ကိုကဆိုးတာ",
+      "မျက်နှာမွဲ", "အရုပ်ဆိုး", "အဆီပုတ်", "ဖက်တီး", "ဝက်လိုကောင်", "ဝက်မ",
+      "နုံချာလိုက်တာ", "ငတုံး", "မအ", "မအေဘေး", "လဒ", "ငကြောင်", "အသုံးမကျတဲ့ကောင်",
+      "အသုံးမကျတဲ့ဟာ", "မျက်နှာပြောင်", "မရှက်ဘူးလား", "ရွံစရာကောင်းလိုက်တာ"
+    ],
+    "profanity": [
+      "လိုး", "လိုးမ", "လိုးမသား", "မအေလိုး", "မအေလိုးသား", "ဖာသည်", "ဖာသယ်",
+      "ဖာခေါင်း", "ဖာသည်မ", "ခွေးမသား", "ခွေးသူတောင်းစား", "လီး", "လီးပဲ", "လီးလား",
+      "စောက်ရမ်း", "စောက်ပတ်", "စောက်ဖုတ်", "စောက်ရူး", "စောက်ကျိုးနည်း",
+      "စောက်သုံးမကျ", "စောက်ချိုး", "စောက်ပေါ", "ခွေးလိုကောင်", "ခွေးမ", "ခွေးသား"
+    ],
+    "insult": [
+      "လူယုတ်မာ", "သူတောင်းစား", "သူခိုး", "လိမ်ညာတဲ့ကောင်", "ငနပိ",
+      "တောသား", "အရူး", "ရူးနေလား", "အပေါစား", "အောက်တန်းစား", "အဆင့်မရှိတဲ့ကောင်",
+      "လိမ်ဖုတ်", "ကောက်ကျစ်တဲ့ကောင်", "ကလေကချေ"
+    ]
+  },
+  "english_lexicon": {
+    "hate_speech": [
+      "nigger", "nigga", "faggot", "kike", "chink", "wetback", "retard",
+      "white trash", "islamophobic", "terrorist", "subhuman", "filthy immigrant"
+    ],
+    "cyberbullying": [
+      "kill yourself", "kys", "die already", "go die", "nobody likes you",
+      "ugly freak", "worthless piece of shit", "waste of oxygen", "fat ugly pig",
+      "loser", "you are pathetic", "disgusting pig", "jump off a cliff"
+    ],
+    "profanity": [
+      "fuck", "fucking", "fucked", "motherfucker", "bitch", "bitches",
+      "cunt", "asshole", "bastard", "dick", "pussy", "shit", "bullshit",
+      "cock", "slut", "whore", "dumbass", "dipshit", "jackass"
+    ],
+    "insult": [
+      "idiot", "moron", "stupid", "imbecile", "trash", "scumbag",
+      "clown", "garbage", "pathetic loser", "brainless", "incompetent"
+    ]
+  },
+  "leetspeak": {
+    "char_map": {
+      "0": "o", "1": "i", "!": "i", "|": "l", "3": "e", "4": "a",
+      "5": "s", "$": "s", "7": "t", "+": "t", "8": "b", "9": "g", "<": "c"
+    },
+    "obfuscation_patterns": {
+      "a": "4@", "e": "3", "i": "1!|", "o": "0", "u": "@*_",
+      "s": "$5", "t": "7+", "l": "1|", "g": "9", "b": "8", "c": "<"
+    }
+  }
+}
