@@ -13,6 +13,12 @@ def pipeline():
     "Charles Dickens was a great writer.",
     "the closer of the ceremony",
     "Hello everyone! Have a wonderful day!",
+    "you",
+    "how are you",
+    "are you there",
+    "Can you help me with this task?",
+    "မင်း",
+    "မင်း နေကောင်းလား",
 ])
 def test_benign_texts_not_harmful(pipeline, text):
     assert not pipeline.predict(text)["is_harmful"]

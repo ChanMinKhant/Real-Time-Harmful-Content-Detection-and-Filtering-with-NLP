@@ -9,7 +9,11 @@ window.BlurManager = (function () {
   let lastClickTarget = null;
 
   function isUserRevealed(el) {
-    return userRevealedElements.has(el) || el.dataset.nlpRevealed === "true" || el.classList.contains("nlp-blur-revealed");
+    if (!el) return false;
+    return userRevealedElements.has(el) ||
+           el.dataset?.nlpRevealed === "true" ||
+           el.classList?.contains("nlp-blur-revealed") ||
+           Boolean(el.closest && el.closest('[data-nlp-revealed="true"], .nlp-blur-revealed'));
   }
 
   function applyBlur(el, res, settings) {
@@ -26,6 +30,9 @@ window.BlurManager = (function () {
 
     el.classList.remove("nlp-blur-revealed");
     el.classList.add("nlp-blur-active");
+    el.setAttribute("data-nlp-blurred", "true");
+    el.dataset.nlpNeedsBlur = "true";
+    delete el.dataset.nlpRevealed;
     const categoryLabel = (res.category || "Harmful Content").toUpperCase();
     const confidencePct = Math.round((res.score || 0) * 100);
     el.setAttribute("title", `⚠️ [${categoryLabel} (${confidencePct}%)] Blurred. Double-click to unblur.`);
@@ -46,10 +53,10 @@ window.BlurManager = (function () {
       nodesToUnblur.add(target);
     }
 
-    // 2. All ancestors with blur class
+    // 2. All ancestors with blur class or attribute
     let curr = target;
     while (curr && curr !== document.body && curr !== document.documentElement) {
-      if (curr.classList && curr.classList.contains('nlp-blur-active')) {
+      if (curr.classList && (curr.classList.contains('nlp-blur-active') || curr.hasAttribute('data-nlp-blurred'))) {
         nodesToUnblur.add(curr);
       }
       curr = curr.parentElement;
@@ -58,10 +65,10 @@ window.BlurManager = (function () {
     // 3. Parent container and all descendant children
     const container = (target.closest && target.closest('.Message, .message, .comment-item, .comment, .post-card, .post, .bubble-content, .text-content, div[role="article"]')) || target.parentElement;
     if (container) {
-      if (container.classList && container.classList.contains('nlp-blur-active')) {
+      if (container.classList && (container.classList.contains('nlp-blur-active') || container.hasAttribute('data-nlp-blurred'))) {
         nodesToUnblur.add(container);
       }
-      const children = container.querySelectorAll ? container.querySelectorAll('.nlp-blur-active') : [];
+      const children = container.querySelectorAll ? container.querySelectorAll('.nlp-blur-active, [data-nlp-blurred="true"]') : [];
       children.forEach(c => nodesToUnblur.add(c));
     }
 
@@ -69,6 +76,8 @@ window.BlurManager = (function () {
     nodesToUnblur.forEach(node => {
       node.classList.remove('nlp-blur-active');
       node.classList.add('nlp-blur-revealed');
+      node.removeAttribute('data-nlp-blurred');
+      delete node.dataset.nlpNeedsBlur;
       node.dataset.nlpRevealed = "true";
       userRevealedElements.add(node);
       node.removeAttribute('title');
@@ -79,7 +88,7 @@ window.BlurManager = (function () {
 
   function handleTwoClickTiming(target, e) {
     if (!target || !target.closest) return false;
-    const blurred = target.closest('.nlp-blur-active');
+    const blurred = target.closest('.nlp-blur-active, [data-nlp-blurred="true"]');
     if (!blurred) return false;
 
     const now = Date.now();
@@ -107,14 +116,14 @@ window.BlurManager = (function () {
     // Native dblclick
     window.addEventListener('dblclick', (e) => {
       if (!e.target || !e.target.closest) return;
-      const blurred = e.target.closest('.nlp-blur-active');
+      const blurred = e.target.closest('.nlp-blur-active, [data-nlp-blurred="true"]');
       if (blurred) unblurElement(blurred, e);
     }, true);
 
     // Prevent navigation / interaction on single click of blurred element
     window.addEventListener('click', (e) => {
       if (!e.target || !e.target.closest) return;
-      const blurred = e.target.closest('.nlp-blur-active');
+      const blurred = e.target.closest('.nlp-blur-active, [data-nlp-blurred="true"]');
       if (blurred) {
         e.preventDefault();
         e.stopPropagation();
@@ -125,7 +134,7 @@ window.BlurManager = (function () {
     // Prevent middle-click open on blurred elements
     window.addEventListener('auxclick', (e) => {
       if (!e.target || !e.target.closest) return;
-      const blurred = e.target.closest('.nlp-blur-active');
+      const blurred = e.target.closest('.nlp-blur-active, [data-nlp-blurred="true"]');
       if (blurred) {
         e.preventDefault();
         e.stopPropagation();
@@ -135,8 +144,10 @@ window.BlurManager = (function () {
   }
 
   function clearAllBlurs() {
-    document.querySelectorAll(".nlp-blur-active, .nlp-blur-revealed").forEach(el => {
+    document.querySelectorAll(".nlp-blur-active, .nlp-blur-revealed, [data-nlp-blurred]").forEach(el => {
       el.classList.remove("nlp-blur-active", "nlp-blur-revealed");
+      el.removeAttribute("data-nlp-blurred");
+      delete el.dataset.nlpNeedsBlur;
       delete el.dataset.nlpRevealed;
       el.removeAttribute("title");
     });

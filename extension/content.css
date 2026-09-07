@@ -1,7 +1,8 @@
 /* Real-time Harmful Content Direct Blur Styles */
 
 /* Blurred Element Styling */
-.nlp-blur-active {
+.nlp-blur-active,
+[data-nlp-blurred="true"] {
   filter: blur(9px) grayscale(50%) opacity(0.35) !important;
   user-select: none !important;
   -webkit-user-select: none !important;
@@ -10,12 +11,14 @@
   transition: filter 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
-.nlp-blur-active:hover {
+.nlp-blur-active:hover,
+[data-nlp-blurred="true"]:hover {
   filter: blur(6px) grayscale(30%) opacity(0.55) !important;
 }
 
 /* Locked links/buttons while blurred */
-a.nlp-blur-active, .nlp-blur-active a, button.nlp-blur-active, .nlp-blur-active button {
+a.nlp-blur-active, .nlp-blur-active a, button.nlp-blur-active, .nlp-blur-active button,
+a[data-nlp-blurred="true"], [data-nlp-blurred="true"] a, button[data-nlp-blurred="true"], [data-nlp-blurred="true"] button {
   cursor: pointer !important;
   text-decoration: none !important;
   pointer-events: auto !important;
@@ -23,7 +26,9 @@ a.nlp-blur-active, .nlp-blur-active a, button.nlp-blur-active, .nlp-blur-active 
 
 /* Revealed Element Styling - 100% force unblur on revealed node and all nested children */
 .nlp-blur-revealed,
-.nlp-blur-revealed * {
+.nlp-blur-revealed *,
+[data-nlp-revealed="true"],
+[data-nlp-revealed="true"] * {
   filter: none !important;
   opacity: 1 !important;
   user-select: auto !important;
@@ -31,6 +36,7 @@ a.nlp-blur-active, .nlp-blur-active a, button.nlp-blur-active, .nlp-blur-active 
   cursor: auto !important;
 }
 
-a.nlp-blur-revealed, .nlp-blur-revealed a {
+a.nlp-blur-revealed, .nlp-blur-revealed a,
+a[data-nlp-revealed="true"], [data-nlp-revealed="true"] a {
   cursor: pointer !important;
 }

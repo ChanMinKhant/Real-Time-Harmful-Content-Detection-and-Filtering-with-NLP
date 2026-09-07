@@ -50,6 +50,28 @@ SEED_CORPUS: List[Sample] = [
     ("Volunteering at the shelter was a rewarding experience.", 0, "safe", "en"),
     ("The train to Mandalay leaves early in the morning.", 0, "safe", "en"),
     ("Please review my pull request when you have time.", 0, "safe", "en"),
+    ("you", 0, "safe", "en"),
+    ("how are you", 0, "safe", "en"),
+    ("How are you doing today?", 0, "safe", "en"),
+    ("Are you there?", 0, "safe", "en"),
+    ("Are you free this weekend?", 0, "safe", "en"),
+    ("Where are you right now?", 0, "safe", "en"),
+    ("Can you help me with this task?", 0, "safe", "en"),
+    ("Could you please share your opinion?", 0, "safe", "en"),
+    ("Thank you very much for your time and help.", 0, "safe", "en"),
+    ("Nice to meet you and talk to you.", 0, "safe", "en"),
+    ("See you tomorrow at the office.", 0, "safe", "en"),
+    ("What do you think about this idea?", 0, "safe", "en"),
+    ("I hope you and your family are well.", 0, "safe", "en"),
+    ("You did an amazing job on the presentation.", 0, "safe", "en"),
+    ("Wishing you a great day ahead!", 0, "safe", "en"),
+    ("If you have any questions, let me know.", 0, "safe", "en"),
+    ("You are always welcome here.", 0, "safe", "en"),
+    ("Tell me more about yourself.", 0, "safe", "en"),
+    ("I agree with you completely.", 0, "safe", "en"),
+    ("Can you hear me clearly?", 0, "safe", "en"),
+    ("It is so nice to see you again.", 0, "safe", "en"),
+    ("Take care of yourself.", 0, "safe", "en"),
 
     # --- Toxic English ---
     ("You are an ugly stupid loser nobody cares about.", 1, "cyberbullying", "en"),
@@ -77,6 +99,12 @@ SEED_CORPUS: List[Sample] = [
     ("Jump off a cliff, freak.", 1, "cyberbullying", "en"),
     ("You scumbag, lying piece of trash.", 1, "insult", "en"),
     ("Ugly freak, nobody will ever love you.", 1, "cyberbullying", "en"),
+    ("fuck", 1, "profanity", "en"),
+    ("fuck you", 1, "profanity", "en"),
+    ("f u c k you", 1, "profanity", "en"),
+    ("you suck so bad loser", 1, "insult", "en"),
+    ("dumbass clown get lost", 1, "insult", "en"),
+    ("go kill yourself piece of garbage", 1, "cyberbullying", "en"),
 
     # --- Safe Myanmar ---
     ("အားလုံးပဲ မင်္ဂလာပါခင်ဗျာ။ ကောင်းသောနေ့လေးဖြစ်ပါစေ။", 0, "safe", "my"),
@@ -104,6 +132,20 @@ SEED_CORPUS: List[Sample] = [
     ("သူငယ်ချင်းတွေ စည်းလုံးကြပါစို့။", 0, "safe", "my"),
     ("အိမ်ပြန်တဲ့အခါ သတိထားပါနော်။", 0, "safe", "my"),
     ("ဒီသီပုံပြင်လေး နားထောင်ရတာ သဘာဝကျတယ်။", 0, "safe", "my"),
+    ("မင်း", 0, "safe", "my"),
+    ("မင်း နေကောင်းလား။", 0, "safe", "my"),
+    ("မင်း နေကောင်းရဲ့လား သူငယ်ချင်း။", 0, "safe", "my"),
+    ("မင်း ဘာလုပ်နေလဲ သူငယ်ချင်း။", 0, "safe", "my"),
+    ("မင်း အားတဲ့အချိန် ပြောပြပါဦး။", 0, "safe", "my"),
+    ("မင်းကို ကျေးဇူးအများကြီးတင်ပါတယ်နော်။", 0, "safe", "my"),
+    ("မင်း စာမေးပွဲ အဆင်ပြေရဲ့လား။", 0, "safe", "my"),
+    ("မင်းနဲ့အတူ အလုပ်လုပ်ရတာ ဝမ်းသာပါတယ်။", 0, "safe", "my"),
+    ("မင်း အကြံပေးတာ အရမ်းကောင်းတယ်။", 0, "safe", "my"),
+    ("မင်း ဘယ်ရောက်နေပြီလဲ။", 0, "safe", "my"),
+    ("မင်း ကူညီပေးလို့ ကျေးဇူးပါပဲဗျာ။", 0, "safe", "my"),
+    ("မင်း ပို့ပေးတဲ့ ဖိုင် ရပါပြီခင်ဗျာ။", 0, "safe", "my"),
+    ("မင်း စိတ်ချမ်းသာပါစေလို့ ဆုတောင်းပါတယ်။", 0, "safe", "my"),
+    ("မင်း ကြိုးစားတာ အရမ်းတော်တယ်။", 0, "safe", "my"),
 
     # --- Toxic Myanmar ---
     ("ဒီကောင်က တော်တော်ရိုင်းတာပဲ ခွေးလိုကောင်။", 1, "profanity", "my"),
@@ -130,17 +172,23 @@ SEED_CORPUS: List[Sample] = [
     ("ဝက်မလိုကောင် စားတတ်တဲ့အဆီပုတ်။", 1, "cyberbullying", "my"),
     ("လီးပဲ မင်းသိတဲ့အတိုင်း ခွေးလိုကောင်။", 1, "profanity", "my"),
     ("တောသားလေးတွေ ဘာမှမသိဘဲ ပြောနေကြတာ။", 1, "insult", "my"),
+    ("မင်း သွားသေလိုက် အလကားကောင်။", 1, "cyberbullying", "my"),
+    ("ခွေးမသား မင်း ဘာလုပ်နေတာလဲ။", 1, "profanity", "my"),
+    ("မအလ ကောင် မျိုးမစစ်။", 1, "cyberbullying", "my"),
+    ("ငလဒ ကောင် စောက်သုံးမကျဘူး။", 1, "cyberbullying", "my"),
+    ("သောက်ရမ်း ရိုင်းတဲ့ကောင် လဒ။", 1, "profanity", "my"),
+    ("မင်း စောက်ချိုး မပြေဘူး။", 1, "profanity", "my"),
 ]
 
 # ---------------------------------------------------------------------------
 # Deterministic augmentation
 # ---------------------------------------------------------------------------
-_EN_NEUTRAL_PREFIX = ["honestly,", "imo,", "tbh,", "fr,", "well,", "look,", "dude,", ""]
+_EN_NEUTRAL_PREFIX = ["honestly,", "imo,", "tbh,", "fr,", "well,", "look,", "dude,", "hey,", ""]
 _EN_NEUTRAL_SUFFIX = ["lol", "lmao", "smh", "bro", "man", "...", "!!", "?!", ""]
 
-_MM_TOXIC_PREFIX = ["မင်း", "သူ", "ဒီကောင်", "ချ", "ကွာ", ""]
+_MM_TOXIC_PREFIX = ["မင်း", "သူ", "ဒီကောင်", "ဟေ့ကောင်", "ချ", "ကွာ", ""]
 _MM_TOXIC_SUFFIX = ["ကွာ", "လေ", "ပဲ", "တာပဲ", "ဟုတ်တယ်", ""]
-_MM_SAFE_PREFIX = ["သူငယ်ချင်းတို့", "အားလုံး", "ကျွန်တော်", "", ""]
+_MM_SAFE_PREFIX = ["မင်း", "သူငယ်ချင်းတို့", "အားလုံး", "ကျွန်တော်", "သူ", ""]
 _MM_SAFE_SUFFIX = ["နော်", "ဗျာ", "ပါ", "ခင်ဗျာ", ""]
 
 
@@ -190,6 +238,36 @@ def build_dataset(seed: int = 42) -> List[Sample]:
             copies += 1
     rng.shuffle(dataset)
     return dataset
+
+
+def build_split_dataset(test_size: float = 0.2, seed: int = 42) -> Tuple[List[Sample], List[Sample]]:
+    """Splits SEED_CORPUS into train and test first to prevent data leakage, then augments both."""
+    from sklearn.model_selection import train_test_split
+    labels = [s[1] for s in SEED_CORPUS]
+    train_seeds, test_seeds = train_test_split(
+        SEED_CORPUS, test_size=test_size, random_state=seed, stratify=labels
+    )
+    rng_train = random.Random(seed)
+    rng_test = random.Random(seed + 100)
+
+    def augment_group(seed_group: List[Sample], rng: random.Random) -> List[Sample]:
+        augmented: List[Sample] = []
+        for text, label, category, lang in seed_group:
+            augmented.append((text, label, category, lang))
+            augment_fn = _augment_mm if lang == "my" else _augment_en
+            seen = {text}
+            copies = 0
+            while copies < 7:
+                variant = augment_fn(text, label, rng)
+                if variant in seen:
+                    continue
+                seen.add(variant)
+                augmented.append((variant, label, category, lang))
+                copies += 1
+        rng.shuffle(augmented)
+        return augmented
+
+    return augment_group(train_seeds, rng_train), augment_group(test_seeds, rng_test)
 
 
 def texts_and_labels(dataset: List[Sample]) -> Tuple[List[str], List[int]]:

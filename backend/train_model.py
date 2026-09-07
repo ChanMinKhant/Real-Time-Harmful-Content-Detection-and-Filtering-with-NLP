@@ -28,9 +28,9 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn.ensemble import VotingClassifier
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from dataset import build_dataset, texts_and_labels  # noqa: E402
+from dataset import build_dataset, build_split_dataset, texts_and_labels  # noqa: E402
 
-MODEL_VERSION = "2.0.0"
+MODEL_VERSION = "2.1.0"
 MODELS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models")
 
 
@@ -54,41 +54,38 @@ def load_external_csv(path: str):
 
 
 def main():
-    dataset = build_dataset()
-    texts, labels = texts_and_labels(dataset)
+    train_data, test_data = build_split_dataset(test_size=0.2, seed=42)
+    X_train, y_train = texts_and_labels(train_data)
+    X_test, y_test = texts_and_labels(test_data)
 
     if "--csv" in sys.argv:
         path = sys.argv[sys.argv.index("--csv") + 1]
         ext_texts, ext_labels = load_external_csv(path)
         print(f"Merging {len(ext_texts)} external samples from {path}")
-        texts += ext_texts
-        labels += ext_labels
+        X_train += ext_texts
+        y_train += ext_labels
 
-    print(f"Dataset size: {len(texts)} "
-          f"(harmful={sum(labels)}, safe={len(labels) - sum(labels)})")
-
-    X_train, X_test, y_train, y_test = train_test_split(
-        texts, labels, test_size=0.2, random_state=42, stratify=labels
-    )
+    print(f"Train size: {len(X_train)} (harmful={sum(y_train)}, safe={len(y_train) - sum(y_train)}) | "
+          f"Test size: {len(X_test)} (harmful={sum(y_test)}, safe={len(y_test) - sum(y_test)})")
 
     vectorizer = TfidfVectorizer(
         analyzer="char_wb",
         ngram_range=(2, 5),
-        min_df=1,
+        min_df=2,
         sublinear_tf=True,
     )
     Xv_train = vectorizer.fit_transform(X_train)
     Xv_test = vectorizer.transform(X_test)
 
-    # Tier 2: fast linear classifier
-    tier2 = LogisticRegression(C=3.0, class_weight="balanced", max_iter=1000)
+    # Tier 2: fast linear classifier with calibrated regularization
+    tier2 = LogisticRegression(C=1.5, class_weight="balanced", max_iter=1000, random_state=42)
     tier2.fit(Xv_train, y_train)
 
     # Tier 3: soft-voting ensemble
     tier3 = VotingClassifier(
         estimators=[
-            ("lr", LogisticRegression(C=5.0, class_weight="balanced", max_iter=1000)),
-            ("nb", MultinomialNB(alpha=0.1)),
+            ("lr", LogisticRegression(C=2.0, class_weight="balanced", max_iter=1000, random_state=42)),
+            ("nb", MultinomialNB(alpha=0.3)),
         ],
         voting="soft",
     )
@@ -121,7 +118,7 @@ def main():
     metadata = {
         "model_version": MODEL_VERSION,
         "trained_at": datetime.now(timezone.utc).isoformat(),
-        "dataset_size": len(texts),
+        "dataset_size": len(X_train) + len(X_test),
         "train_size": len(X_train),
         "test_size": len(X_test),
         "f1_harmful_tier2": round(float(f1_harmful_t2), 4),

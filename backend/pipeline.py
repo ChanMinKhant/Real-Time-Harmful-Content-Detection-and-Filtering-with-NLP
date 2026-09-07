@@ -40,6 +40,37 @@ PROFANITY_HINTS = [
 ]
 INSULT_HINTS = ["idiot", "moron", "stupid", "imbecile", "trash", "clown", "ငတုံး", "အရူး", "အောက်တန်းစား", "လူယုတ်မာ"]
 
+BENIGN_CONVERSATIONAL_PHRASES = {
+    "you", "how are you", "how are you doing", "how are you today", "are you there",
+    "are you okay", "are you free", "where are you", "who are you", "what about you",
+    "can you help", "could you help", "thank you", "thanks", "hello", "hi", "hey",
+    "good morning", "good evening", "good afternoon", "see you", "welcome", "take care",
+    "take care of yourself", "ok", "okay", "yes", "no", "sure", "nice to meet you",
+    "မင်း", "မင်း နေကောင်းလား", "နေကောင်းလား", "မင်္ဂလာပါ", "မင်္ဂလာမနက်ခင်းပါ",
+    "ကျေးဇူးတင်ပါတယ်", "ဟုတ်ကဲ့", "ဟုတ်တယ်", "ဘာလုပ်နေလဲ", "မင်း ဘာလုပ်နေလဲ"
+}
+
+BENIGN_TOKENS = {
+    "you", "your", "yours", "me", "my", "mine", "he", "him", "his", "she", "her", "hers",
+    "we", "us", "our", "ours", "they", "them", "their", "theirs", "it", "its",
+    "are", "is", "am", "was", "were", "be", "been", "being",
+    "how", "what", "where", "when", "why", "who", "which", "there", "here",
+    "to", "the", "a", "an", "and", "or", "in", "on", "at", "for", "with", "about",
+    "hi", "hello", "hey", "yes", "no", "ok", "okay", "thanks", "thank",
+    "မင်း", "သူ", "ငါ", "ကျွန်တော်", "ကျွန်မ", "တို့", "တွေ", "ပါ", "နော်", "ဗျာ", "ခင်ဗျာ",
+    "နေကောင်းလား", "မင်္ဂလာပါ", "ကျေးဇူးတင်ပါတယ်", "ဟုတ်ကဲ့", "ဟုတ်တယ်"
+}
+
+
+def is_purely_benign_conversational(text: str, tokens: Optional[List[str]] = None) -> bool:
+    cleaned = text.strip().lower().rstrip("?!.,;:")
+    if cleaned in BENIGN_CONVERSATIONAL_PHRASES:
+        return True
+    toks = tokens or cleaned.split()
+    if toks and all(t.lower().rstrip("?!.,;:") in BENIGN_TOKENS for t in toks if t.strip()):
+        return True
+    return False
+
 
 class CascadingNLPPipeline:
     """Multi-tiered NLP engine for real-time bilingual toxicity detection."""
@@ -110,12 +141,12 @@ class CascadingNLPPipeline:
         X = self.vectorizer.fit_transform(texts)
 
         # Tier 2 Fast Model
-        self.tier2_model = LogisticRegression(C=3.0, class_weight='balanced', max_iter=1000)
+        self.tier2_model = LogisticRegression(C=1.5, class_weight='balanced', max_iter=1000, random_state=42)
         self.tier2_model.fit(X, labels)
 
         # Tier 3 Calibrated Ensemble Model (Voting Classifier)
-        clf1 = LogisticRegression(C=5.0, class_weight='balanced', max_iter=1000)
-        clf2 = MultinomialNB(alpha=0.1)
+        clf1 = LogisticRegression(C=2.0, class_weight='balanced', max_iter=1000, random_state=42)
+        clf2 = MultinomialNB(alpha=0.3)
         self.tier3_ensemble = VotingClassifier(
             estimators=[('lr', clf1), ('nb', clf2)],
             voting='soft'
@@ -296,6 +327,25 @@ class CascadingNLPPipeline:
             self._update_stats(latency)
             return result
 
+        # Guardrail: Polite conversational phrases and neutral pronouns
+        if is_purely_benign_conversational(cleaned_text, tokens):
+            with self._lock:
+                self.stats["tier1_lexicon_hits"] += 1
+            latency = (time.perf_counter() - start_time) * 1000.0
+            result = {
+                "text": raw_text,
+                "is_harmful": False,
+                "score": 0.05,
+                "category": "safe",
+                "language": lang,
+                "tier_used": "Tier 1 (Conversational Guardrail)",
+                "reason": "Classified safe (conversational pronoun/greeting)",
+                "latency_ms": round(latency, 2),
+            }
+            self._save_cache(cache_key, result)
+            self._update_stats(latency)
+            return result
+
         # -------------------------------------------------------------
         # TIER 2: Fast TF-IDF ML Classifier (< 5ms)
         # -------------------------------------------------------------
@@ -416,7 +466,7 @@ class CascadingNLPPipeline:
             self._update_stats((time.perf_counter() - start_time) * 1000.0)
             return [r for r in results if r is not None]
 
-        # Tier 1: Lexicon Filter
+        # Tier 1: Lexicon Filter & Conversational Guardrail
         still_pending: List[Tuple[int, str, str, str, str, str]] = []
         for idx, node_id, raw_text, cleaned_text, lang, cache_key in pending:
             lexicon_res = fast_lexicon_check(cleaned_text, lang)
@@ -434,6 +484,22 @@ class CascadingNLPPipeline:
                     "tier_used": "Tier 1 (Lexicon/Pattern Filter)",
                     "matched_keyword": matched_word,
                     "reason": reason,
+                    "latency_ms": 0.0,
+                }
+                results[idx] = result
+                self._save_cache(cache_key, result)
+            elif is_purely_benign_conversational(cleaned_text):
+                with self._lock:
+                    self.stats["tier1_lexicon_hits"] += 1
+                result = {
+                    "id": node_id,
+                    "text": raw_text,
+                    "is_harmful": False,
+                    "score": 0.05,
+                    "category": "safe",
+                    "language": lang,
+                    "tier_used": "Tier 1 (Conversational Guardrail)",
+                    "reason": "Classified safe (conversational pronoun/greeting)",
                     "latency_ms": 0.0,
                 }
                 results[idx] = result

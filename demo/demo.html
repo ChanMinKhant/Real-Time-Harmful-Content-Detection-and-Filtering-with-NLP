@@ -281,6 +281,50 @@
       color: #e2e8f0;
       line-height: 1.5;
     }
+
+    /* Telegram Web Simulation */
+    .tg-chat-container {
+      background: #0f0f0f;
+      border: 1px solid #2e2e2e;
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .tg-bubble {
+      max-width: 70%;
+      padding: 8px 12px;
+      border-radius: 14px;
+      font-size: 14px;
+      position: relative;
+      word-break: break-word;
+      display: inline-flex;
+      align-items: flex-end;
+      gap: 8px;
+    }
+    .tg-bubble.out {
+      align-self: flex-end;
+      background: #7c65c1;
+      color: #ffffff;
+      border-bottom-right-radius: 4px;
+    }
+    .tg-bubble.in {
+      align-self: flex-start;
+      background: #212121;
+      color: #ffffff;
+      border-bottom-left-radius: 4px;
+    }
+    .tg-bubble .text-content {
+      display: inline;
+    }
+    .tg-bubble .time {
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.7);
+      margin-left: auto;
+      white-space: nowrap;
+      user-select: none;
+    }
   </style>
 </head>
 <body>
@@ -300,8 +344,10 @@
         <button class="preset-btn danger" onclick="addPreset('en_cyberbullying')">+ Add EN Cyberbullying</button>
         <button class="preset-btn danger" onclick="addPreset('mm_toxic')">+ Add MM Toxic/Profanity</button>
         <button class="preset-btn danger" onclick="addPreset('mm_hate')">+ Add MM Hate Speech</button>
+        <button class="preset-btn danger" onclick="addTelegramBubble('fuck', true)">+ Telegram ("fuck 14:26")</button>
         <button class="preset-btn success" onclick="addPreset('en_safe')">+ Add EN Wholesome Post</button>
         <button class="preset-btn success" onclick="addPreset('mm_safe')">+ Add MM Polite Post</button>
+        <button class="preset-btn success" onclick="addTelegramBubble('how are you', true)">+ Telegram ("how are you")</button>
       </div>
     </div>
 
@@ -422,6 +468,44 @@
         </div>
       </div>
 
+      <!-- Post 3: Telegram Web Chat Simulator -->
+      <div class="post-card">
+        <div class="post-author-row">
+          <div class="avatar" style="background: linear-gradient(135deg, #7c65c1 0%, #5856d6 100%);">TG</div>
+          <div class="author-info">
+            <h4>Telegram Web Chat Simulation (Live Verification)</h4>
+            <span>Dynamic Chat Bubble Test &bull; web.telegram.org Structure</span>
+          </div>
+        </div>
+        <p class="post-content" style="color: #94a3b8; font-size: 13px; margin-bottom: 12px;">
+          This reproduces Telegram Web's exact message bubble hierarchy (including metadata timestamp badges like <code>14:26 ✓</code>). Notice how benign conversational words ("hi", "you", "how are you", "မင်း နေကောင်းလား") remain crystal clear, while profanity ("fuck") is cleanly blurred!
+        </p>
+
+        <div class="tg-chat-container" id="telegram-chat-feed">
+          <div class="tg-bubble out">
+            <div class="text-content">hi</div>
+            <span class="time">14:26 ✓</span>
+          </div>
+          <div class="tg-bubble out">
+            <div class="text-content">how are you</div>
+            <span class="time">14:26 ✓</span>
+          </div>
+          <div class="tg-bubble in">
+            <div class="text-content">မင်း နေကောင်းလား</div>
+            <span class="time">14:26</span>
+          </div>
+          <!-- Harmful Telegram Message with Timestamp (Exact User Screenshot Scenario) -->
+          <div class="tg-bubble out">
+            <div class="text-content">fuck</div>
+            <span class="time">14:26 ✓</span>
+          </div>
+          <div class="tg-bubble in">
+            <div class="text-content">မင်း သွားသေလိုက်</div>
+            <span class="time">14:27</span>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -477,6 +561,20 @@
         </div>
       `;
       commentsSection.appendChild(commentItem);
+    }
+
+    function addTelegramBubble(text, isOut) {
+      const tgFeed = document.getElementById("telegram-chat-feed");
+      if (!tgFeed) return;
+      const now = new Date();
+      const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+      const bubble = document.createElement("div");
+      bubble.className = `tg-bubble ${isOut ? 'out' : 'in'}`;
+      bubble.innerHTML = `
+        <div class="text-content">${text}</div>
+        <span class="time">${timeStr} ${isOut ? '✓' : ''}</span>
+      `;
+      tgFeed.appendChild(bubble);
     }
   </script>
 </body>

@@ -1,11 +1,11 @@
 {
-  "model_version": "2.0.0",
-  "trained_at": "2026-09-02T05:03:30.814581+00:00",
-  "dataset_size": 832,
-  "train_size": 665,
-  "test_size": 167,
-  "f1_harmful_tier2": 1.0,
-  "f1_harmful_tier3": 1.0,
+  "model_version": "2.1.0",
+  "trained_at": "2026-09-06T08:10:48.072444+00:00",
+  "dataset_size": 1216,
+  "train_size": 968,
+  "test_size": 248,
+  "f1_harmful_tier2": 0.8191,
+  "f1_harmful_tier3": 0.8367,
   "vectorizer": {
     "analyzer": "char_wb",
     "ngram_range": [

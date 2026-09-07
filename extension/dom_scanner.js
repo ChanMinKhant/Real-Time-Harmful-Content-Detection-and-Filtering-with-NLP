@@ -128,6 +128,47 @@ window.BlurDomScanner = (function () {
     return null;
   }
 
+  function isMetadataElement(el) {
+    if (!el || el.nodeType !== Node.ELEMENT_NODE) return false;
+    const tag = el.tagName.toLowerCase();
+    if (tag === 'time' || tag === 'svg' || tag === 'path' || tag === 'tg-emoji') return true;
+    const cls = (el.className && typeof el.className === 'string') ? el.className.toLowerCase() : '';
+    if (/(?:^|\s|-|_)(?:time|status|date|timestamp|clock|check|reaction|tail|reply-markup|avatar)(?:$|\s|-|_)/.test(cls)) return true;
+    if (el.getAttribute('data-timestamp') || el.getAttribute('aria-label')?.includes('time')) return true;
+    return false;
+  }
+
+  function extractCleanText(el) {
+    if (!el) return "";
+    if (!el.children || el.children.length === 0) {
+      let t = (el.textContent || "").trim();
+      return t.replace(/\b\d{1,2}:\d{2}\b/g, '').replace(/[✓✔\s]+$/g, '').trim();
+    }
+    try {
+      const clone = el.cloneNode(true);
+      const meta = clone.querySelectorAll('time, svg, tg-emoji, .time, .message-time, .message-status, [class*="time"], [class*="status"], [class*="reaction"], [class*="tail"]');
+      meta.forEach(m => m.remove());
+      let text = (clone.textContent || "").trim();
+      text = text.replace(/\b\d{1,2}:\d{2}\b/g, '').replace(/[✓✔\s]+$/g, '').trim();
+      return text || (el.textContent || "").trim();
+    } catch (e) {
+      return (el.textContent || "").trim();
+    }
+  }
+
+  const CHAT_CONTAINER_SELECTORS = [
+    '.text-content',
+    '.message',
+    '.bubble-content',
+    '.translatable-message',
+    '[data-message-id]',
+    '[data-mid]',
+    '.copyable-text',
+    '[id^="message-content-"]',
+    '.comment-text',
+    '.post-content'
+  ].join(',');
+
   function isCandidateElement(node) {
     if (!node || node.nodeType !== Node.ELEMENT_NODE) return false;
     const tag = node.tagName.toLowerCase();
@@ -139,14 +180,15 @@ window.BlurDomScanner = (function () {
       return false;
     }
 
-    // Leaf preference: skip parents whose non-inline children already contain the content
+    // Skip elements whose non-inline, non-metadata children already contain the substantial content
     for (const child of node.children) {
-      if (INLINE_TAGS.has(child.tagName.toLowerCase())) continue;
-      const childText = (child.textContent || "").trim();
-      if (childText.length >= 2) return false;
+      const childTag = child.tagName.toLowerCase();
+      if (INLINE_TAGS.has(childTag) || isMetadataElement(child)) continue;
+      const childClean = extractCleanText(child);
+      if (childClean.length >= 2) return false;
     }
 
-    const text = (node.textContent || "").trim();
+    const text = extractCleanText(node);
     if (!text || text.length < 2 || text.length > 1500) return false;
 
     return true;
@@ -154,12 +196,26 @@ window.BlurDomScanner = (function () {
 
   function collectCandidates(rootNode) {
     const candidates = new Set();
+    if (!rootNode) return candidates;
+
+    // 1. Check known chat and comment containers directly
+    if (rootNode.querySelectorAll) {
+      const directChats = rootNode.querySelectorAll(CHAT_CONTAINER_SELECTORS);
+      directChats.forEach(el => {
+        if (!SKIP_TAGS.has(el.tagName.toLowerCase()) && !el.isContentEditable) {
+          candidates.add(el);
+        }
+      });
+    }
+
+    // 2. TreeWalker text traversal
     const walker = document.createTreeWalker(rootNode, NodeFilter.SHOW_TEXT, {
       acceptNode(node) {
         const parent = node.parentElement;
         if (!parent) return NodeFilter.FILTER_REJECT;
         const tag = parent.tagName.toLowerCase();
         if (SKIP_TAGS.has(tag) || parent.isContentEditable) return NodeFilter.FILTER_REJECT;
+        if (isMetadataElement(parent)) return NodeFilter.FILTER_REJECT;
         const t = node.nodeValue ? node.nodeValue.trim() : "";
         if (t.length < 2) return NodeFilter.FILTER_REJECT;
         return NodeFilter.FILTER_ACCEPT;
@@ -168,7 +224,12 @@ window.BlurDomScanner = (function () {
 
     let tn;
     while ((tn = walker.nextNode())) {
-      candidates.add(tn.parentElement);
+      const p = tn.parentElement;
+      if (p) {
+        // Find closest meaningful container or leaf element
+        const chatWrapper = p.closest ? p.closest(CHAT_CONTAINER_SELECTORS) : null;
+        candidates.add(chatWrapper || p);
+      }
     }
     return candidates;
   }
@@ -177,6 +238,8 @@ window.BlurDomScanner = (function () {
     initPatterns,
     checkLocalLexicon,
     isCandidateElement,
-    collectCandidates
+    collectCandidates,
+    extractCleanText,
+    isMetadataElement
   };
 })();

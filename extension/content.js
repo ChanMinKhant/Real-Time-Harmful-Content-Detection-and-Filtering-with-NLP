@@ -71,7 +71,8 @@
   }
 
   function evaluateElement(el) {
-    const text = (el.textContent || "").trim();
+    if (!el || BlurManager.isUserRevealed(el)) return;
+    const text = DomScanner.extractCleanText ? DomScanner.extractCleanText(el) : (el.textContent || "").trim();
     if (text.length < 2 || text.length > 1500) return;
 
     processedNodes.add(el);
@@ -170,7 +171,13 @@
 
     if (!scanQueued) {
       scanQueued = true;
-      const runner = window.requestIdleCallback || ((cb) => setTimeout(cb, 100));
+      const runner = (cb) => {
+        if (window.requestIdleCallback) {
+          window.requestIdleCallback(cb, { timeout: 200 });
+        } else {
+          setTimeout(cb, 100);
+        }
+      };
       runner(() => {
         scanQueued = false;
         const roots = pendingRoots.splice(0);
@@ -192,6 +199,19 @@
           }
         } else if (mutation.type === 'characterData' && mutation.target.parentElement) {
           queueScan(mutation.target.parentElement);
+        } else if (mutation.type === 'attributes') {
+          const target = mutation.target;
+          if (target && target.nodeType === Node.ELEMENT_NODE) {
+            // If React/Teact stripped our blur attribute/class on a harmful node that hasn't been unblurred, restore it
+            if (target.dataset && target.dataset.nlpNeedsBlur === "true" && !BlurManager.isUserRevealed(target)) {
+              if (!target.classList.contains('nlp-blur-active')) {
+                target.classList.add('nlp-blur-active');
+              }
+              if (!target.hasAttribute('data-nlp-blurred')) {
+                target.setAttribute('data-nlp-blurred', 'true');
+              }
+            }
+          }
         }
       }
     });
@@ -199,7 +219,9 @@
     observer.observe(document.body || document.documentElement, {
       childList: true,
       subtree: true,
-      characterData: true
+      characterData: true,
+      attributes: true,
+      attributeFilter: ['class', 'data-nlp-blurred']
     });
   }
 
